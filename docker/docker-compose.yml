@@ -1,0 +1,91 @@
+# docker/docker-compose.yml — CySec Arsenal Lab Stack
+# NuRichter · CySec Arsenal
+#
+# Services:
+#   arsenal   — Main toolkit container (interactive)
+#   dvwa      — Damn Vulnerable Web App  → http://localhost:8080
+#   juice     — OWASP Juice Shop         → http://localhost:3000
+#   db        — MySQL backend for DVWA
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose exec arsenal bash
+
+version: "3.9"
+
+networks:
+  ctf-lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  dvwa-db:
+
+services:
+
+  # ── Main Arsenal Container ──────────────────────────────────────────────────
+  arsenal:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: cysec-arsenal:latest
+    container_name: arsenal
+    hostname: arsenal
+    stdin_open: true
+    tty: true
+    networks:
+      ctf-lab:
+        ipv4_address: 172.20.0.10
+    volumes:
+      - ..:/arsenal                 # live-mount repo
+      - /tmp/ctf-loot:/loot         # shared loot directory
+    environment:
+      - TERM=xterm-256color
+      - RUST_LOG=info
+    restart: unless-stopped
+
+  # ── DVWA (intentionally vulnerable web app) ─────────────────────────────────
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    container_name: dvwa
+    hostname: dvwa
+    networks:
+      ctf-lab:
+        ipv4_address: 172.20.0.20
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - DB_SERVER=db
+    restart: unless-stopped
+
+  # ── MySQL for DVWA ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:5.7
+    container_name: dvwa-db
+    networks:
+      ctf-lab:
+        ipv4_address: 172.20.0.21
+    volumes:
+      - dvwa-db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: dvwa
+      MYSQL_DATABASE: dvwa
+      MYSQL_USER: dvwa
+      MYSQL_PASSWORD: dvwa
+    restart: unless-stopped
+
+  # ── OWASP Juice Shop ────────────────────────────────────────────────────────
+  juice:
+    image: bkimminich/juice-shop:latest
+    container_name: juice-shop
+    hostname: juice
+    networks:
+      ctf-lab:
+        ipv4_address: 172.20.0.30
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

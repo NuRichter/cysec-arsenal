@@ -1,0 +1,84 @@
+# CySec Arsenal — .gitignore
+
+# ── Rust ─────────────────────────────────────────────────────────────────────
+/target/
+Cargo.lock
+**/*.rs.bk
+.cargo/
+
+# ── C build output ────────────────────────────────────────────────────────────
+c/bin/
+*.o
+*.a
+*.so
+*.out
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Wordlists (too large for git) ─────────────────────────────────────────────
+wordlists/passwords/rockyou.txt
+wordlists/dirs/dirbuster-medium.txt
+wordlists/subdomains/top100k.txt
+
+# ── Scan / tool output ────────────────────────────────────────────────────────
+output/
+logs/
+carved_output/
+extracted/
+ctf_workspace/
+
+# ── Capture files ─────────────────────────────────────────────────────────────
+*.pcap
+*.pcapng
+*.cap
+*.bin
+*.dump
+*.img
+*.iso
+*.vmdk
+*.mem
+
+# ── CTF binaries (don't commit challenge files) ───────────────────────────────
+*.elf
+*.exe
+ctf/challenges/
+
+# ── Secrets / credentials ─────────────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets.yaml
+secrets.json
+config.local.toml
+
+# ── Docker volumes ────────────────────────────────────────────────────────────
+dvwa-db/
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Temporary ─────────────────────────────────────────────────────────────────
+*.tmp
+*.bak
+/tmp/
+loot/

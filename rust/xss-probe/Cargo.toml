@@ -1,0 +1,24 @@
+[package]
+name        = "xss-probe"
+description = "Reflected XSS scanner with context detection"
+workspace   = "../.."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "xssprobe"
+path = "src/main.rs"
+
+[dependencies]
+arsenal-core      = { path = "../arsenal-core" }
+tokio.workspace   = true
+reqwest.workspace = true
+clap.workspace    = true
+colored.workspace = true
+anyhow.workspace  = true
+serde.workspace   = true
+serde_json.workspace = true
+url.workspace     = true
+regex.workspace   = true

@@ -1,0 +1,17 @@
+[package]
+name        = "arsenal-core"
+description = "Shared utilities, colors, banner, and logging for CySec Arsenal"
+workspace   = ".."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+colored.workspace     = true
+chrono.workspace      = true
+tracing.workspace     = true
+tracing-subscriber.workspace = true
+anyhow.workspace      = true
+serde.workspace       = true
+serde_json.workspace  = true

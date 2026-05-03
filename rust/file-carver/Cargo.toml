@@ -1,0 +1,20 @@
+[package]
+name        = "file-carver"
+description = "Binary file signature carver for forensics and CTF"
+workspace   = "../.."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "fcarve"
+path = "src/main.rs"
+
+[dependencies]
+arsenal-core     = { path = "../arsenal-core" }
+clap.workspace   = true
+colored.workspace = true
+anyhow.workspace = true
+serde.workspace  = true
+serde_json.workspace = true

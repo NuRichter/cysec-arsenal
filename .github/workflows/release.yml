@@ -1,0 +1,130 @@
+# .github/workflows/release.yml
+# Cross-compile Arsenal binaries for Linux x86_64 and ARM64 on tag push
+# NuRichter · CySec Arsenal
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux-x64:
+    name: Build Linux x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl tools
+        run: sudo apt-get install -y musl-tools --no-install-recommends
+
+      - name: Build release (musl static)
+        run: |
+          cargo build --release --workspace \
+            --target x86_64-unknown-linux-musl
+
+      - name: Strip and package binaries
+        run: |
+          mkdir -p dist/linux-x86_64
+          for bin in pscan subenum wfuzz hcrack sqliprobe lfiprobe xssprobe \
+                     cipher fcarve osint netmon ropx dbust; do
+            src="target/x86_64-unknown-linux-musl/release/$bin"
+            if [ -f "$src" ]; then
+              strip "$src"
+              cp "$src" "dist/linux-x86_64/$bin"
+            fi
+          done
+          tar -czf arsenal-linux-x86_64.tar.gz -C dist linux-x86_64/
+          sha256sum arsenal-linux-x86_64.tar.gz > arsenal-linux-x86_64.tar.gz.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arsenal-linux-x86_64
+          path: |
+            arsenal-linux-x86_64.tar.gz
+            arsenal-linux-x86_64.tar.gz.sha256
+
+  build-linux-arm64:
+    name: Build Linux ARM64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust + ARM64 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-musl
+
+      - name: Install cross-compiler
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools --no-install-recommends
+
+      - name: Build release (ARM64 musl)
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
+        run: |
+          cargo build --release --workspace \
+            --target aarch64-unknown-linux-musl
+
+      - name: Package
+        run: |
+          mkdir -p dist/linux-arm64
+          for bin in pscan subenum wfuzz hcrack cipher fcarve osint ropx dbust; do
+            src="target/aarch64-unknown-linux-musl/release/$bin"
+            [ -f "$src" ] && cp "$src" "dist/linux-arm64/$bin" || true
+          done
+          tar -czf arsenal-linux-arm64.tar.gz -C dist linux-arm64/
+          sha256sum arsenal-linux-arm64.tar.gz > arsenal-linux-arm64.tar.gz.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arsenal-linux-arm64
+          path: |
+            arsenal-linux-arm64.tar.gz
+            arsenal-linux-arm64.tar.gz.sha256
+
+  release:
+    name: Create GitHub Release
+    needs: [build-linux-x64, build-linux-arm64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "CySec Arsenal ${{ github.ref_name }}"
+          body: |
+            ## CySec Arsenal ${{ github.ref_name }}
+            **NuRichter Workspace · Richterize The Infinity ∞**
+
+            ### Binaries included
+            `pscan` · `subenum` · `wfuzz` · `hcrack` · `sqliprobe` · `lfiprobe`
+            `xssprobe` · `cipher` · `fcarve` · `osint` · `netmon` · `ropx` · `dbust`
+
+            ### Checksums
+            See `.sha256` files alongside each archive.
+
+            > ⚠ For authorized CTF and security research use only.
+          files: |
+            release-assets/**/*.tar.gz
+            release-assets/**/*.sha256
+          draft: false
+          prerelease: false

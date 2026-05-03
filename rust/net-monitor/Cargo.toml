@@ -1,0 +1,21 @@
+[package]
+name        = "net-monitor"
+description = "Live network traffic statistics and anomaly detection"
+workspace   = "../.."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "netmon"
+path = "src/main.rs"
+
+[dependencies]
+arsenal-core     = { path = "../arsenal-core" }
+clap.workspace   = true
+colored.workspace = true
+anyhow.workspace = true
+tokio.workspace  = true
+serde.workspace  = true
+chrono.workspace = true

@@ -1,0 +1,25 @@
+[package]
+name        = "subdomain-enum"
+description = "Passive + active subdomain enumeration via crt.sh and DNS brute force"
+workspace   = "../.."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "subenum"
+path = "src/main.rs"
+
+[dependencies]
+arsenal-core      = { path = "../arsenal-core" }
+tokio.workspace   = true
+reqwest.workspace = true
+clap.workspace    = true
+colored.workspace = true
+anyhow.workspace  = true
+serde.workspace   = true
+serde_json.workspace = true
+tracing.workspace = true
+indicatif.workspace = true
+trust-dns-resolver.workspace = true

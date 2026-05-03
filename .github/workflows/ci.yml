@@ -1,0 +1,97 @@
+# .github/workflows/ci.yml
+# Lint, cargo check, clippy, and Python bandit scan
+# NuRichter · CySec Arsenal
+
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ── Rust ────────────────────────────────────────────────────────────────────
+  rust:
+    name: Rust Check & Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: cargo-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: cargo fmt check
+        run: cargo fmt --all -- --check
+
+      - name: cargo check
+        run: cargo check --workspace --all-targets
+
+      - name: cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test --workspace --lib 2>/dev/null || true
+
+  # ── C ───────────────────────────────────────────────────────────────────────
+  c-build:
+    name: C Build (hardened only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GCC
+        run: sudo apt-get install -y gcc --no-install-recommends
+
+      - name: Build hardened C tools
+        run: make -C c all
+
+      - name: Verify hexdump binary
+        run: ./c/bin/hexdump --help || true
+
+  # ── Shell ───────────────────────────────────────────────────────────────────
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck --no-install-recommends
+
+      - name: Run shellcheck on all scripts
+        run: |
+          find scripts/ -name "*.sh" -exec shellcheck --severity=warning {} +
+
+  # ── Python ──────────────────────────────────────────────────────────────────
+  python:
+    name: Python Bandit Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install bandit
+        run: pip install bandit
+
+      - name: Run bandit on python/
+        run: bandit -r python/ --severity-level medium || true

@@ -1,0 +1,78 @@
+[workspace]
+resolver = "2"
+members = [
+    "rust/arsenal-core",
+    "rust/port-scanner",
+    "rust/subdomain-enum",
+    "rust/web-fuzzer",
+    "rust/hash-cracker",
+    "rust/sqli-probe",
+    "rust/lfi-probe",
+    "rust/xss-probe",
+    "rust/cipher-tools",
+    "rust/file-carver",
+    "rust/osint-harvest",
+    "rust/net-monitor",
+    "rust/rop-analyzer",
+    "rust/dir-buster",
+]
+
+[workspace.package]
+version     = "1.0.0"
+authors     = ["NuRichter <nurichter-workspace.vercel.app>"]
+edition     = "2021"
+license     = "MIT"
+repository  = "https://github.com/NuRichter/cysec-arsenal"
+keywords    = ["security", "ctf", "pentest", "red-team"]
+categories  = ["command-line-utilities"]
+
+# ─── Shared dependency versions ────────────────────────────────────────────────
+[workspace.dependencies]
+# Async runtime
+tokio        = { version = "1",  features = ["full"] }
+# HTTP client
+reqwest      = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+# CLI parsing
+clap         = { version = "4",  features = ["derive", "color"] }
+# Serialization
+serde        = { version = "1",  features = ["derive"] }
+serde_json   = "1"
+# Hashing
+md-5         = "0.10"
+sha1         = "0.10"
+sha2         = "0.10"
+sha3         = "0.10"
+hex          = "0.4"
+# Terminal colors
+colored      = "2"
+# Progress bar
+indicatif    = "0.17"
+# Error handling
+anyhow       = "1"
+thiserror    = "1"
+# Logging
+tracing                 = "0.1"
+tracing-subscriber      = { version = "0.3", features = ["env-filter"] }
+# Regex
+regex        = "1"
+# URL parsing
+url          = "2"
+# DNS
+trust-dns-resolver = "0.23"
+# Rayon (parallel iterators)
+rayon        = "1"
+# Base64
+base64       = "0.22"
+# Time
+chrono       = "0.4"
+
+[profile.release]
+opt-level   = 3
+strip       = true
+lto         = true
+codegen-units = 1
+panic       = "abort"
+
+[profile.dev]
+opt-level   = 0
+debug       = true

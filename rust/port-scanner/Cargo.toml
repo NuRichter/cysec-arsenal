@@ -1,0 +1,22 @@
+[package]
+name        = "port-scanner"
+description = "High-speed async TCP port scanner with banner grabbing"
+workspace   = "../.."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "pscan"
+path = "src/main.rs"
+
+[dependencies]
+arsenal-core    = { path = "../arsenal-core" }
+tokio.workspace = true
+clap.workspace  = true
+colored.workspace = true
+anyhow.workspace  = true
+tracing.workspace = true
+indicatif.workspace = true
+chrono.workspace  = true
